@@ -1839,7 +1839,7 @@ if __name__ == "__main__":
             print("21. Advanced Report Generation")
             print("22. Exit\n")
 
-            choice = input("Enter a choice from the given options (1-21): ")
+            choice = input("Enter a choice from the given options (1-22): ")
 
             if choice == '1':
                 break
@@ -2171,4 +2171,4 @@ if __name__ == "__main__":
                 print("Thank you for using VulnScan\nExiting...")
                 sys.exit()
             else:
-                print("\nInvalid option. Please enter a valid option (1-21)")
+                print("\nInvalid option. Please enter a valid option (1-22)")
