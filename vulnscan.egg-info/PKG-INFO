@@ -1,8 +1,8 @@
 Metadata-Version: 2.4
 Name: vulnscan
-Version: 3.3.4
+Version: 3.3.6
 Summary: A vulnerability scanner
-Author-email: Gokul Kannan G <gokulkannan.dev@gmail.com>
+Author-email: Gokul Kannan Gokulkannanganesamoorthy <gokulkannan.dev@gmail.com>
 License: MIT License
 Project-URL: Homepage, https://github.com/gokulkannanganesamoorthy/vulnscan
 Project-URL: Bug Tracker, https://github.com/gokulkannanganesamoorthy/vulnscan/issues

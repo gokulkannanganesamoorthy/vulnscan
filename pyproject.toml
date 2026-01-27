@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vulnscan"
-version = "3.3.4"
+version = "3.3.6"
 authors = [
-  { name="Gokul Kannan G", email="gokulkannan.dev@gmail.com" },
+  { name="Gokul Kannan Gokulkannanganesamoorthy", email="gokulkannan.dev@gmail.com" },
 ]
 description = "A vulnerability scanner"
 readme = "README.md"

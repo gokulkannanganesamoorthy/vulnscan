@@ -1831,9 +1831,6 @@ def generate_advanced_report(domain_name):
 #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #
 #
 
-
-def main():
-
     # Initialize global results dictionary
 
     global scan_results
