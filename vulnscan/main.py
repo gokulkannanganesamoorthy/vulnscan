@@ -58,6 +58,10 @@ import secrets
 import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Wireless Modules
+from vulnscan.modules.wireless_controller_scanner import WirelessControllerScanner
+from vulnscan.modules.wsn_iot_api_auditor import WSNApiAuditor
 from vulnscan.modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
 from vulnscan.modules.advanced_reporting import AdvancedSecurityReporter
 from vulnscan.modules.ai_powered_checking import AIVulnerabilityDetector
@@ -252,6 +256,8 @@ def get_args():
                       help="read the list from INPUT_FILE", metavar="INPUT_FILE")
     parser.add_option("-t", "--threads", type=int, dest="n_threads", help="Set the number of threads",
                       metavar="N_THREADS", default=12)
+    parser.add_option("-u", "--url", dest="target_url", help="Target URL/Domain for the scan", metavar="URL")
+    parser.add_option("--scan", dest="scan_type", default="interactive", help="Type of scan to run (e.g., 'comprehensive')", metavar="SCAN_TYPE")
     return parser.parse_args()
 
 #
@@ -1799,6 +1805,18 @@ def run_comprehensive_scan(domain_name):
     platform = ModernSecurityPlatform(domain_name, config={})
     results = platform.run_comprehensive_scan()
 
+    # Run Wireless Security Modules
+    try:
+        wlc = WirelessControllerScanner(domain_name)
+        wlc_res = wlc.run_tests()
+        results['wlc_scan'] = wlc_res
+
+        wsn = WSNApiAuditor(domain_name)
+        wsn_res = wsn.run_tests()
+        results['wsn_api_scan'] = wsn_res
+    except Exception as e:
+        print(f"[-] Error running wireless modules in comprehensive scan: {e}")
+
     # Update global results
     global scan_results
     scan_results.update(results)
@@ -1833,9 +1851,7 @@ def generate_advanced_report(domain_name):
 
 
 def main():
-    if __name__ == "__main__":
-        pass # To maintain indentation level if needed, but actually we just want to start the function here.
-    
+
     # Initialize global results dictionary
 
     global scan_results
@@ -1882,11 +1898,13 @@ def main():
             print("19. Comprehensive Security Scan")
             print("20. Running Security Tool Integration")
             print("21. Advanced Report Generation")
-            print("22. Security Tool Integration")
-            print("23. Sensitive Data Exposure Check")
-            print("24. Exit\n")
+            print("22. Sensitive Data Exposure Check")
+            print("23. Advanced Report Generation (PDF)")
+            print("24. Wireless Controller Scan (WLC)")
+            print("25. WSN/IoT API Auditor (5G Core)")
+            print("26. Exit\n")
 
-            choice = input("Enter a choice from the given options (1-24): ")
+            choice = input("Enter a choice from the given options (1-26): ")
 
             if choice == '1':
                 break
@@ -2205,7 +2223,7 @@ def main():
                 else:
                     print("\n[-] No scan results available. Run scans first.")
 
-            elif choice == '23':
+            elif choice == '22':
                 # Sensitive Data Exposure
                 print("\n[*] Running Sensitive Data Exposure Check...")
                 domain_with_scheme = ensure_url_scheme(domain_name)
@@ -2228,19 +2246,52 @@ def main():
                     print(f"\n[-] Error during sensitive data check: {e}")
 
             elif choice == '24':
-                if scan_results['findings']:
-                    print("\n[*] Generating Advanced Security Report...")
-                    reporter = AdvancedSecurityReporter(
-                        domain_name, scan_results)
-                    reports = reporter.generate_all_reports()
+                # Wireless Controller Scan (WLC)
+                print("\n[*] Running Wireless Controller Scan (WLC)...")
+                domain_with_scheme = ensure_url_scheme(domain_name)
+                wlc_scanner = WirelessControllerScanner(domain_with_scheme)
+                
+                try:
+                    results = wlc_scanner.run_tests()
+                    
+                    if 'findings' not in scan_results:
+                        scan_results['findings'] = {}
+                        
+                    scan_results['findings']['wlc_scan'] = results
+                    print("\n[+] Wireless Controller Scan completed")
+                    
+                    for finding in results:
+                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                        
+                except Exception as e:
+                    print(f"\n[-] Error during WLC scan: {e}")
 
-                    print("\n[+] Reports generated successfully:")
-                    for format_type, file_path in reports.items():
-                        print(f"  - {format_type.upper()}: {file_path}")
+            elif choice == '25':
+                # WSN/IoT API Auditor
+                print("\n[*] Running WSN/IoT API Auditor (5G Core / Sensors)...")
+                domain_with_scheme = ensure_url_scheme(domain_name)
+                wsn_auditor = WSNApiAuditor(domain_with_scheme)
+                
+                try:
+                    results = wsn_auditor.run_tests()
+                    
+                    if 'findings' not in scan_results:
+                        scan_results['findings'] = {}
+                        
+                    scan_results['findings']['wsn_api_scan'] = results
+                    print("\n[+] WSN/IoT API Auditor Scan completed")
+                    
+                    for finding in results:
+                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                        
+                except Exception as e:
+                    print(f"\n[-] Error during WSN API scan: {e}")
+            
+            elif choice == '26':
                 print("Thank you for using VulnScan\nExiting...")
                 sys.exit()
             else:
-                print("\nInvalid option. Please enter a valid option (1-24)")
+                print("\nInvalid option. Please enter a valid option (1-26)")
 
 
 

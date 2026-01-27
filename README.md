@@ -8,7 +8,7 @@
 
 ## 🚀 Features
 
-VulnScan currently includes **21 powerful modules**:
+VulnScan currently includes **26 powerful modules**:
 
 1. Change Target Domain
    - Function: `ensure_url_scheme`
@@ -86,9 +86,19 @@ VulnScan currently includes **21 powerful modules**:
     - Class: `SensitiveDataExposureTester`
     - Method: `check_sensitive_data`
 
+23. **Wireless Controller Scan (WLC)**
+    - Class: `WirelessControllerScanner`
+    - Method: `run_tests`
+
+24. **WSN/IoT API Auditor (5G Core)**
+    - Class: `WSNApiAuditor`
+    - Method: `run_tests`
+
+25. **Exit**
+
 > Each module is plug-and-play and optimized for fast, accurate results.
 
-### 🌟 v3.3.0 "Production Level" Upgrades
+### 🌟 v3.4.5 "Production Level" Upgrades
 
 - **Real-Time Logging**: Findings are streamed instantly to the console as they are discovered.
 - **Parallel Scanning**: All modules run concurrently for maximum speed.
