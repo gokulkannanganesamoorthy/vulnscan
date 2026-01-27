@@ -1831,7 +1831,10 @@ def generate_advanced_report(domain_name):
 #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #
 #
 
-if __name__ == "__main__":
+
+def main():
+    if __name__ == "__main__":
+        pass # To maintain indentation level if needed, but actually we just want to start the function here.
     
     # Initialize global results dictionary
 
@@ -2238,6 +2241,7 @@ if __name__ == "__main__":
                 sys.exit()
             else:
                 print("\nInvalid option. Please enter a valid option (1-24)")
+
 
 
 if __name__ == "__main__":
