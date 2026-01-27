@@ -15,17 +15,17 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from base.utils import extractHeaders, strength, isProtected, stringToBinary, longestCommonSubstring
-from base.sendRequest import sendRequest
-from base.extractHTMLInformation import extractHTMLInformation
-from base.rangeFinder import rangeFinder
-from base.formEvaluate import formEvaluate
-from base.modifyManipulateAPI import modifyManipulateAPI
-from base.crawl import crawl
-from base.prompt import prompt
-from base.formParser import formParser
-from base.entropy import isRandom
-from base.colors import green, yellow, end, run, good, info, bad, white, red
+from vulnscan.base.utils import extractHeaders, strength, isProtected, stringToBinary, longestCommonSubstring
+from vulnscan.base.sendRequest import sendRequest
+from vulnscan.base.extractHTMLInformation import extractHTMLInformation
+from vulnscan.base.rangeFinder import rangeFinder
+from vulnscan.base.formEvaluate import formEvaluate
+from vulnscan.base.modifyManipulateAPI import modifyManipulateAPI
+from vulnscan.base.crawl import crawl
+from vulnscan.base.prompt import prompt
+from vulnscan.base.formParser import formParser
+from vulnscan.base.entropy import isRandom
+from vulnscan.base.colors import green, yellow, end, run, good, info, bad, white, red
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import statistics
@@ -49,7 +49,7 @@ from urllib.parse import urljoin
 import os
 from pprint import pprint
 import colorama
-from base.testing import headers
+from vulnscan.base.testing import headers
 import concurrent.futures
 from pathlib import Path
 from fuzzywuzzy import fuzz, process
@@ -58,14 +58,14 @@ import secrets
 import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
-from modules.advanced_reporting import AdvancedSecurityReporter
-from modules.ai_powered_checking import AIVulnerabilityDetector
-from modules.cloud_vulnerability_checking import CloudSecurityScanner
-from modules.domain_passive_active_check import AdvancedSubdomainEnumerator
-from modules.modern_security_platform import ModernSecurityPlatform
-from modules.web_app_checking import AdvancedWebAppTester
-from modules.sensitive_data_exposure import SensitiveDataExposureTester
+from vulnscan.modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
+from vulnscan.modules.advanced_reporting import AdvancedSecurityReporter
+from vulnscan.modules.ai_powered_checking import AIVulnerabilityDetector
+from vulnscan.modules.cloud_vulnerability_checking import CloudSecurityScanner
+from vulnscan.modules.domain_passive_active_check import AdvancedSubdomainEnumerator
+from vulnscan.modules.modern_security_platform import ModernSecurityPlatform
+from vulnscan.modules.web_app_checking import AdvancedWebAppTester
+from vulnscan.modules.sensitive_data_exposure import SensitiveDataExposureTester
 
 
 #
@@ -1830,7 +1830,9 @@ def generate_advanced_report(domain_name):
 #
 #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #
 #
-if __name__ == "__main__":
+
+
+def main():
 
     # Initialize global results dictionary
 
