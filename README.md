@@ -101,7 +101,7 @@ VulnScan currently includes **21 powerful modules**:
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/iamgokulkannan/vulnscan.git
+git clone https://github.com/gokulkannanganesamoorthy/vulnscan.git
 cd vulnscan
 pip install -r requirements.txt
 python pdf_vulnscan_updated.py

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vulnscan"
-version = "3.3.0"
+version = "3.3.2"
 authors = [
   { name="Gokul Kannan G", email="gokulkannan.dev@gmail.com" },
 ]
@@ -16,6 +16,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+license = {text = "MIT License"}
 dependencies = [
     "selenium",
     "tqdm",
@@ -61,6 +62,9 @@ vulnscan = "vulnscan.cli:main"
 [project.urls]
 "Homepage" = "https://github.com/gokulkannanganesamoorthy/vulnscan"
 "Bug Tracker" = "https://github.com/gokulkannanganesamoorthy/vulnscan/issues"
+
+[tool.setuptools]
+license-files = []
 
 [tool.setuptools.packages.find]
 where = ["."]
