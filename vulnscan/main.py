@@ -584,7 +584,7 @@ def csrf(domain_name):
     if headers_input == 'y':
         headers = extractHeaders(prompt())
     else:
-        from base.testing import headers
+        from vulnscan.base.testing import headers
 
     allTokens = []
     weakTokens = []
@@ -1831,6 +1831,8 @@ def generate_advanced_report(domain_name):
 #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #       #
 #
 
+if __name__ == "__main__":
+    
     # Initialize global results dictionary
 
     global scan_results

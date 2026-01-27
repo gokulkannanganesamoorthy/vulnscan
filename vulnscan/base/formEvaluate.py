@@ -1,6 +1,6 @@
 from re import match
-from base.utils import strength
-from base.testing import commonNames
+from vulnscan.base.utils import strength
+from vulnscan.base.testing import commonNames
 
 
 def formEvaluate(dataset, weakTokens, tokenDatabase, allTokens, insecureForms):

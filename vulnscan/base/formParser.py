@@ -1,7 +1,7 @@
 import random
 import re
 
-from base.testing import password, email, tokenPattern, strings
+from vulnscan.base.testing import password, email, tokenPattern, strings
 
 
 def formParser(forms, tolerate=False):

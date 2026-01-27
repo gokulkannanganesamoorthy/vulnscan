@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vulnscan"
-version = "3.3.7"
+version = "3.4.1"
 authors = [
   { name="Gokul Kannan Gokulkannanganesamoorthy", email="gokulkannan.dev@gmail.com" },
 ]
