@@ -8,6 +8,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import ssl
 import socket
+import os
 
 
 class AdvancedSubdomainEnumerator:
@@ -15,6 +16,12 @@ class AdvancedSubdomainEnumerator:
         self.domain = domain
         self.subdomains = set()
         self.results = []
+        
+        # Configure robust DNS resolver
+        self.resolver = dns.resolver.Resolver()
+        self.resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1']
+        self.resolver.timeout = 2.0
+        self.resolver.lifetime = 5.0
         self.wordlist = self.load_wordlist()
 
     def load_wordlist(self):
@@ -29,7 +36,11 @@ class AdvancedSubdomainEnumerator:
 
         # Additional wordlist from file if available
         try:
-            with open('wordlists/subdomains.txt', 'r') as f:
+            # Use path relative to this file's location to find subdomains.txt in project root
+            # This file is in modules/, so we need to go up one level
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            file_path = os.path.join(base_dir, 'subdomains.txt')
+            with open(file_path, 'r') as f:
                 additional = [line.strip() for line in f if line.strip()]
                 return common + additional
         except:
@@ -172,6 +183,37 @@ class AdvancedSubdomainEnumerator:
             except:
                 pass
 
+    def dns_record_enumeration(self):
+        """Enumerate important DNS records (TXT, MX, NS)"""
+        record_types = ['TXT', 'MX', 'NS', 'SOA']
+        
+        for record_type in record_types:
+            try:
+                answers = self.resolver.resolve(self.domain, record_type)
+                for rdata in answers:
+                    self.results.append({
+                        'type': f'DNS Record ({record_type})',
+                        'severity': 'Info',
+                        'description': f"Found {record_type} record: {rdata.to_text()}",
+                        'domain': self.domain,
+                        'record_data': rdata.to_text()
+                    })
+                    
+                    # Check for specific misconfigurations in TXT records (SPF/DMARC)
+                    if record_type == 'TXT':
+                        text = rdata.to_text()
+                        if 'v=spf1' in text:
+                             if '-all' not in text and '~all' not in text:
+                                  self.results.append({
+                                    'type': 'Weak SPF Record',
+                                    'severity': 'Medium',
+                                    'description': f"SPF record may be too permissive (missing -all or ~all): {text}",
+                                    'domain': self.domain
+                                })
+            except Exception as e:
+                # Record might not exist, which is fine
+                pass
+
     def run_enumeration(self):
         """Run all subdomain enumeration techniques"""
         print(f"[*] Starting advanced subdomain enumeration for {self.domain}")
@@ -181,7 +223,8 @@ class AdvancedSubdomainEnumerator:
             ("DNS Brute Force", self.dns_brute_force),
             ("Search Engines", self.search_engine_enumeration),
             ("VirusTotal", self.virustotal_enumeration),
-            ("Certificate Analysis", self.certificate_enumeration)
+            ("Certificate Analysis", self.certificate_enumeration),
+            ("DNS Records", self.dns_record_enumeration)
         ]
 
         for name, technique in techniques:
@@ -196,5 +239,6 @@ class AdvancedSubdomainEnumerator:
         return {
             'subdomains': list(self.subdomains),
             'takeovers': self.results,
-            'total': len(self.subdomains)
+            'total': len(self.subdomains),
+            'dns_records': [r for r in self.results if 'DNS Record' in r.get('type', '')]
         }

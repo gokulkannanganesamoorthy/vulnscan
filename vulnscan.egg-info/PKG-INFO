@@ -1,3 +1,54 @@
+Metadata-Version: 2.4
+Name: vulnscan
+Version: 3.2.1
+Summary: A vulnerability scanner
+Author-email: Gokul Kannan G <gokulkannan.dev@gmail.com>
+Project-URL: Homepage, https://github.com/iamgokulkannan/vulnscan
+Project-URL: Bug Tracker, https://github.com/iamgokulkannan/vulnscan/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: <3.14,>=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: selenium
+Requires-Dist: tqdm
+Requires-Dist: reportlab
+Requires-Dist: python-nmap
+Requires-Dist: colorama
+Requires-Dist: fuzzywuzzy
+Requires-Dist: python-Levenshtein
+Requires-Dist: cryptography
+Requires-Dist: progress
+Requires-Dist: python-dotenv
+Requires-Dist: tensorflow
+Requires-Dist: keras
+Requires-Dist: scikit-learn
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: boto3
+Requires-Dist: google-cloud-storage
+Requires-Dist: azure-storage-blob
+Requires-Dist: kubernetes
+Requires-Dist: graphql-core
+Requires-Dist: requests-toolbelt
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: plotly
+Requires-Dist: dnspython
+Requires-Dist: html5lib
+Requires-Dist: chardet
+Requires-Dist: playwright
+Requires-Dist: uvloop
+Requires-Dist: jinja2
+Requires-Dist: weasyprint
+Requires-Dist: joblib
+Requires-Dist: h5py
+Requires-Dist: openapi-spec-validator
+Requires-Dist: dotenv
+Requires-Dist: beautifulsoup4
+Dynamic: license-file
+
 # 🔍 VulnScan
 **VulnScan** is a powerful and lightweight **Web Penetration Testing Toolkit** developed over 3 years of research, crafted to assist ethical hackers, security researchers, and developers in identifying web application vulnerabilities quickly and efficiently.
 > ⚡ Built with passion. Backed by real-world interviews. Recognized by industry leaders.

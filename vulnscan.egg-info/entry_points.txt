@@ -1,0 +1,2 @@
+[console_scripts]
+vulnscan = vulnscan.cli:main

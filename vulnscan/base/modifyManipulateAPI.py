@@ -1,4 +1,4 @@
-from vulnscan.base.testing import tokenPattern
+from base.testing import tokenPattern
 import random
 import re
 

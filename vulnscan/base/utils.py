@@ -1,5 +1,5 @@
 import re
-from vulnscan.base.testing import tokenPattern
+from base.testing import tokenPattern
 
 
 def longestCommonSubstring(s1, s2):

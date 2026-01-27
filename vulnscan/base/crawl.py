@@ -3,10 +3,10 @@ from re import findall
 import concurrent.futures
 from urllib.parse import urlparse  # for python3
 
-from vulnscan.base.colors import run
-from vulnscan.base.extractHTMLInformation import extractHTMLInformation
-from vulnscan.base.sendRequest import sendRequest
-from vulnscan.base.utils import getUrl, getParams, remove_file
+from base.colors import run
+from base.extractHTMLInformation import extractHTMLInformation
+from base.sendRequest import sendRequest
+from base.utils import getUrl, getParams, remove_file
 
 
 def crawl(seedUrl, headers, depth, threadCount):
