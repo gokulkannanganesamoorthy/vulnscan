@@ -1,10 +1,10 @@
 Metadata-Version: 2.4
 Name: vulnscan
-Version: 3.2.1
+Version: 3.3.0
 Summary: A vulnerability scanner
 Author-email: Gokul Kannan G <gokulkannan.dev@gmail.com>
-Project-URL: Homepage, https://github.com/iamgokulkannan/vulnscan
-Project-URL: Bug Tracker, https://github.com/iamgokulkannan/vulnscan/issues
+Project-URL: Homepage, https://github.com/gokulkannanganesamoorthy/vulnscan
+Project-URL: Bug Tracker, https://github.com/gokulkannanganesamoorthy/vulnscan/issues
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent

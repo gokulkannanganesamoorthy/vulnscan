@@ -59,8 +59,8 @@ dependencies = [
 vulnscan = "vulnscan.cli:main"
 
 [project.urls]
-"Homepage" = "https://github.com/iamgokulkannan/vulnscan"
-"Bug Tracker" = "https://github.com/iamgokulkannan/vulnscan/issues"
+"Homepage" = "https://github.com/gokulkannanganesamoorthy/vulnscan"
+"Bug Tracker" = "https://github.com/gokulkannanganesamoorthy/vulnscan/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

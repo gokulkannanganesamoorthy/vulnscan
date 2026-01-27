@@ -33,6 +33,6 @@ vulnscan/modules/cloud_vulnerability_checking.py
 vulnscan/modules/domain_passive_active_check.py
 vulnscan/modules/modern_security_platform.py
 vulnscan/modules/security_tool_integration.py
+vulnscan/modules/sensitive_data_exposure.py
 vulnscan/modules/web_app_checking.py
-vulnscan/venv/__init__.py
 vulnscan/venv/bin/jp.py
