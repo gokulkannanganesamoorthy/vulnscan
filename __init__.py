@@ -6,7 +6,7 @@ A comprehensive web application vulnerability scanner with AI-powered detection.
 """
 
 __version__ = "1.0.3"
-__author__ = "Gokul Kannan G"
+__author__ = "Gokul Kannan Ganesamoorthy"
 __email__ = "gokulkannan.dev@gmail.com"
 
 # Import main components for easier access

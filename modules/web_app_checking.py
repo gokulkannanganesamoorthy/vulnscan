@@ -6,6 +6,7 @@ from urllib.parse import urljoin, urlparse
 import time
 import random
 import string
+import concurrent.futures
 
 
 class AdvancedWebAppTester:
@@ -354,13 +355,15 @@ class AdvancedWebAppTester:
 
     def run_tests(self):
         """Run all web application security tests"""
-        print(
-            f"[*] Starting advanced web application security testing for {self.target_url}")
+        print(f"[*] Starting advanced web app scan for {self.target_url} (UA: {self.session.headers['User-Agent'][:30]}...)")
 
-        # Crawl website
-        print("[*] Crawling website to discover pages and forms...")
-        crawled_urls = self.crawl_website()
-        print(f"[*] Crawled {len(crawled_urls)} pages")
+        # Test XSS
+        print("[*] Testing for XSS...")
+        self.test_xss_parallel()
+
+        # Test SQL Injection
+        print("[*] Testing for SQL Injection...")
+        self.test_sqli_parallel()
 
         # Test JWT security
         print("[*] Testing JWT security...")
@@ -370,4 +373,300 @@ class AdvancedWebAppTester:
         print("[*] Testing API security...")
         self.test_api_security()
 
+        # Test Security Headers
+        print("[*] Testing security headers...")
+        self.test_security_headers()
+
+        # Test Cookie Security
+        print("[*] Testing cookie security...")
+        self.test_cookie_security()
+
         return self.results
+
+    def test_xss_parallel(self):
+        """Test for XSS vulnerabilities using parallelism"""
+        try:
+            response = self.session.get(self.target_url, timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            forms = soup.find_all('form')
+            
+            print(f"[*] Found {len(forms)} forms to test for XSS.")
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(self._test_form_xss, form, response.url) for form in forms]
+                concurrent.futures.wait(futures)
+                
+            # Also test URL parameters
+            self._test_url_xss()
+
+        except Exception as e:
+            print(f"[-] Error testing XSS: {e}")
+
+    def _test_form_xss(self, form, url):
+        """Helper to test a single form for XSS"""
+        try:
+            action = form.get('action')
+            method = form.get('method', 'get').lower()
+            inputs = form.find_all('input')
+            
+            target_url = urljoin(url, action)
+            
+            for payload in self.xss_payloads:
+                data = {}
+                for input_tag in inputs:
+                    if input_tag.get('type') in ['text', 'search', 'url', 'email', 'password']:
+                        data[input_tag.get('name')] = payload
+                    else:
+                         data[input_tag.get('name')] = input_tag.get('value', '')
+                
+                try:
+                    if method == 'post':
+                        res = self.session.post(target_url, data=data, timeout=5)
+                    else:
+                        res = self.session.get(target_url, params=data, timeout=5)
+                    
+                    if payload in res.text:
+                         self.results.append({
+                            'type': 'Reflected XSS',
+                            'severity': 'High',
+                            'description': f"XSS vulnerability found in form at {target_url} with payload {payload}",
+                            'url': target_url,
+                            'payload': payload
+                        })
+                         return # Stop after finding one XSS in this form to save time
+                except:
+                    pass
+        except Exception as e:
+            pass
+
+    def test_sqli_parallel(self):
+        """Test for SQL Injection vulnerabilities using parallelism"""
+        try:
+            response = self.session.get(self.target_url, timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            forms = soup.find_all('form')
+            
+            print(f"[*] Found {len(forms)} forms to test for SQLi.")
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(self._test_form_sqli, form, response.url) for form in forms]
+                concurrent.futures.wait(futures)
+
+            # Also test URL parameters
+            self._test_url_sqli()
+
+        except Exception as e:
+            print(f"[-] Error testing SQLi: {e}")
+
+    def _test_form_sqli(self, form, url):
+        """Helper to test a single form for SQLi"""
+        try:
+            action = form.get('action')
+            method = form.get('method', 'get').lower()
+            inputs = form.find_all('input')
+            
+            target_url = urljoin(url, action)
+            
+            for payload in self.sqli_payloads:
+                data = {}
+                for input_tag in inputs:
+                    if input_tag.get('type') in ['text', 'search', 'url', 'email', 'password']:
+                        data[input_tag.get('name')] = payload
+                    else:
+                        data[input_tag.get('name')] = input_tag.get('value', '')
+                
+                try:
+                    if method == 'post':
+                        res = self.session.post(target_url, data=data, timeout=5)
+                    else:
+                        res = self.session.get(target_url, params=data, timeout=5)
+                    
+                    # Basic SQL error detection
+                    errors = [
+                        "SQL syntax", "mysql_fetch", "native client", "ORA-", 
+                        "PostgreSQL query", "SQLite/JDBCDriver"
+                    ]
+                    
+                    for error in errors:
+                        if error.lower() in res.text.lower():
+                            self.results.append({
+                                'type': 'SQL Injection',
+                                'severity': 'Critical',
+                                'description': f"Possible SQL Injection found in form at {target_url} with payload {payload}",
+                                'url': target_url,
+                                'payload': payload
+                            })
+                            return
+                except:
+                    pass
+        except:
+             pass
+
+    def _test_url_xss(self):
+        """Test URL parameters for XSS"""
+        parsed = urlparse(self.target_url)
+        if not parsed.query:
+            return
+            
+        params = parsed.query.split('&')
+        base_url = self.target_url.split('?')[0]
+        
+        for payload in self.xss_payloads:
+            for param in params:
+                if '=' in param:
+                    key = param.split('=')[0]
+                    # Construct new query
+                    new_query = f"{key}={payload}"
+                    # Rebuild complete URL (simplified for single param injection)
+                    target = f"{base_url}?{new_query}"
+                    
+                    try:
+                        res = self.session.get(target, timeout=5)
+                        if payload in res.text:
+                            self.results.append({
+                                'type': 'Reflected XSS (URL)',
+                                'severity': 'High',
+                                'description': f"XSS vulnerability found in URL parameter {key}",
+                                'url': target,
+                                'payload': payload
+                            })
+                    except:
+                        pass
+
+    def _test_url_sqli(self):
+        """Test URL parameters for SQLi"""
+        parsed = urlparse(self.target_url)
+        if not parsed.query:
+            return
+            
+        params = parsed.query.split('&')
+        base_url = self.target_url.split('?')[0]
+        
+        for payload in self.sqli_payloads:
+            for param in params:
+                 if '=' in param:
+                    key = param.split('=')[0]
+                    new_query = f"{key}={payload}"
+                    target = f"{base_url}?{new_query}"
+                    
+                    try:
+                        res = self.session.get(target, timeout=5)
+                        errors = ["SQL syntax", "mysql_fetch", "native client", "ORA-", "PostgreSQL query"]
+                        for error in errors:
+                            if error.lower() in res.text.lower():
+                                 self.results.append({
+                                    'type': 'SQL Injection (URL)',
+                                    'severity': 'Critical',
+                                    'description': f"SQL Injection found in URL parameter {key}",
+                                    'url': target,
+                                    'payload': payload
+                                })
+                    except:
+                        pass
+    
+    def test_xss(self):
+         # Legacy method wrapper
+         self.test_xss_parallel()
+
+    def test_sqli(self):
+        # Legacy method wrapper
+        self.test_sqli_parallel()
+
+    def test_api_security(self):
+        """Test API endpoints for security vulnerabilities"""
+        # Common API paths
+        api_paths = ['/api', '/rest', '/graphql',
+                     '/v1', '/v2', '/swagger', '/openapi.json']
+
+        for path in api_paths:
+            url = urljoin(self.target_url, path)
+            try:
+                response = self.session.get(url, timeout=10)
+                if response.status_code == 200:
+                    # Test for API-specific vulnerabilities
+                    if 'graphql' in path:
+                        self.test_graphql_security(url)
+                    elif 'swagger' in path or 'openapi' in path:
+                        self.results.append({
+                            'type': 'Exposed API Documentation',
+                            'severity': 'Medium',
+                            'description': f"API documentation is exposed at {url}",
+                            'url': url
+                        })
+            except:
+                pass
+
+    def test_security_headers(self):
+        """Check for missing security headers"""
+        try:
+            response = self.session.get(self.target_url, timeout=10)
+            headers = response.headers
+
+            security_headers = {
+                'X-Frame-Options': 'Protects against Clickjacking attacks.',
+                'Content-Security-Policy': 'Mitigates XSS and data injection attacks.',
+                'Strict-Transport-Security': 'Enforces secure (HTTPS) connections.',
+                'X-Content-Type-Options': 'Prevents MIME-sniffing.',
+                'Referrer-Policy': 'Controls how much referrer information is included with requests.',
+                'Permissions-Policy': 'Controls which browser features can be used.'
+            }
+
+            for header, description in security_headers.items():
+                if header not in headers:
+                    self.results.append({
+                        'type': 'Missing Security Header',
+                        'severity': 'Low', # Keep as Low/Medium to avoid alarm fatigue for common missing headers
+                        'description': f"Missing {header} header. {description}",
+                        'url': self.target_url
+                    })
+        except Exception as e:
+            print(f"[-] Error checking security headers: {e}")
+
+    def test_cookie_security(self):
+        """Check for insecure cookie configurations"""
+        try:
+            response = self.session.get(self.target_url, timeout=10)
+            cookies = response.cookies
+
+            for cookie in cookies:
+                issues = []
+                if not cookie.secure:
+                     issues.append("Missing 'Secure' flag")
+                if not cookie.has_nonstandard_attr('HttpOnly') and not cookie.get_nonstandard_attr('HttpOnly'): # Requests cookie jar handling vary
+                     # Check if it's actually HttpOnly (requests might not expose this easily depending on version, generic check)
+                     # Inspecting raw headers is often more reliable for HttpOnly
+                     pass 
+
+                # Re-check via headers for Set-Cookie to be sure about flags
+                pass
+            
+            # Robust check using Set-Cookie header parsing
+            if 'Set-Cookie' in response.headers:
+                # This catches multiple Set-Cookie headers
+                # Note: requests merges them, but we can iterate if we access raw or splitting
+                # For simplicity, we just look for flags in the string representation if possible or rely on the cookie jar
+                pass
+
+            # Improved Cookie Check iterating properly
+            for cookie in self.session.cookies:
+                 # Check Secure
+                if not cookie.secure:
+                    self.results.append({
+                        'type': 'Insecure Cookie',
+                        'severity': 'Medium',
+                        'description': f"Cookie '{cookie.name}' is missing the 'Secure' flag.",
+                        'url': self.target_url
+                    })
+                
+                # Check HttpOnly (Requires some heuristic as requests.cookies doesn't always show it clearly on the object)
+                # We can check the rest of the cookie attributes if available, but 'httponly' is often a specific attribute
+                if not cookie.has_nonstandard_attr('HttpOnly'):
+                     self.results.append({
+                        'type': 'Insecure Cookie',
+                        'severity': 'Medium',
+                        'description': f"Cookie '{cookie.name}' may be missing the 'HttpOnly' flag.",
+                        'url': self.target_url
+                    })
+
+        except Exception as e:
+            print(f"[-] Error checking cookie security: {e}")

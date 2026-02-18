@@ -8,7 +8,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    pass
+    from vulnscan.main import main as run_scan
+    run_scan()
 
 
 if __name__ == "__main__":

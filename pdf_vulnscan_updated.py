@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from xml.sax.saxutils import escape
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -14,17 +15,17 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from base.utils import extractHeaders, strength, isProtected, stringToBinary, longestCommonSubstring
-from base.sendRequest import sendRequest
-from base.extractHTMLInformation import extractHTMLInformation
-from base.rangeFinder import rangeFinder
-from base.formEvaluate import formEvaluate
-from base.modifyManipulateAPI import modifyManipulateAPI
-from base.crawl import crawl
-from base.prompt import prompt
-from base.formParser import formParser
-from base.entropy import isRandom
-from base.colors import green, yellow, end, run, good, info, bad, white, red
+from vulnscan.base.utils import extractHeaders, strength, isProtected, stringToBinary, longestCommonSubstring
+from vulnscan.base.sendRequest import sendRequest
+from vulnscan.base.extractHTMLInformation import extractHTMLInformation
+from vulnscan.base.rangeFinder import rangeFinder
+from vulnscan.base.formEvaluate import formEvaluate
+from vulnscan.base.modifyManipulateAPI import modifyManipulateAPI
+from vulnscan.base.crawl import crawl
+from vulnscan.base.prompt import prompt
+from vulnscan.base.formParser import formParser
+from vulnscan.base.entropy import isRandom
+from vulnscan.base.colors import green, yellow, end, run, good, info, bad, white, red
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import statistics
@@ -48,7 +49,7 @@ from urllib.parse import urljoin
 import os
 from pprint import pprint
 import colorama
-from base.testing import headers
+from vulnscan.base.testing import headers
 import concurrent.futures
 from pathlib import Path
 from fuzzywuzzy import fuzz, process
@@ -57,13 +58,14 @@ import secrets
 import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
-from modules.advanced_reporting import AdvancedSecurityReporter
-from modules.ai_powered_checking import AIVulnerabilityDetector
-from modules.cloud_vulnerability_checking import CloudSecurityScanner
-from modules.domain_passive_active_check import AdvancedSubdomainEnumerator
-from modules.modern_security_platform import ModernSecurityPlatform
-from modules.web_app_checking import AdvancedWebAppTester
+from vulnscan.modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
+from vulnscan.modules.advanced_reporting import AdvancedSecurityReporter
+from vulnscan.modules.ai_powered_checking import AIVulnerabilityDetector
+from vulnscan.modules.cloud_vulnerability_checking import CloudSecurityScanner
+from vulnscan.modules.domain_passive_active_check import AdvancedSubdomainEnumerator
+from vulnscan.modules.modern_security_platform import ModernSecurityPlatform
+from vulnscan.modules.web_app_checking import AdvancedWebAppTester
+from vulnscan.modules.sensitive_data_exposure import SensitiveDataExposureTester
 
 
 #
@@ -582,7 +584,7 @@ def csrf(domain_name):
     if headers_input == 'y':
         headers = extractHeaders(prompt())
     else:
-        from base.testing import headers
+        from vulnscan.base.testing import headers
 
     allTokens = []
     weakTokens = []
@@ -1188,7 +1190,7 @@ def directory_enumeration(url):
         url += '/'
 
     # Define the path to your subdirectories file
-    file_path = "/Users/gokulkannan.g/Desktop/vulnscan/subdirectories.txt"
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subdirectories.txt")
 
     try:
         with open(file_path, "r") as file:
@@ -1660,9 +1662,28 @@ def generate_report(domain_name, ip_address, options, args, active_domains=None,
     print(f"\nReport generated: {report_filename}")
 
 
+
+class CloudLogger:
+    """Thread-safe logger for real-time output"""
+    _lock = threading.Lock()
+
+    @staticmethod
+    def log(message, level="INFO"):
+        with CloudLogger._lock:
+            if level == "INFO":
+                print(f"[*] {message}")
+            elif level == "SUCCESS":
+                print(f"[+] {message}")
+            elif level == "ERROR":
+                print(f"[-] {message}")
+            elif level == "WARNING":
+                print(f"[!] {message}")
+            else:
+                print(message)
+
 def run_advanced_scan(domain_name):
-    """Run all advanced security scans"""
-    print("\n[*] Running Advanced Security Scan...")
+    """Run all advanced security scans with real-time feedback"""
+    CloudLogger.log("Running Advanced Security Scan (Production Mode)...", "INFO")
 
     # Initialize results dictionary
     global scan_results
@@ -1672,23 +1693,37 @@ def run_advanced_scan(domain_name):
         'findings': {}
     }
 
-    # Run scans in parallel
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    # Run scans in parallel with real-time feedback
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            'domain_enumeration': executor.submit(run_advanced_domain_enum, domain_name),
-            'cloud_vulnerabilities': executor.submit(run_cloud_scan, domain_name),
-            'web_app_vulnerabilities': executor.submit(run_web_app_scan, domain_name),
-            'api_vulnerabilities': executor.submit(run_api_scan, domain_name),
-            'ai_findings': executor.submit(run_ai_scan, domain_name)
+            executor.submit(run_advanced_domain_enum, domain_name): 'domain_enumeration',
+            executor.submit(run_cloud_scan, domain_name): 'cloud_vulnerabilities',
+            executor.submit(run_web_app_scan, domain_name): 'web_app_vulnerabilities',
+            executor.submit(run_api_scan, domain_name): 'api_vulnerabilities',
+            executor.submit(run_ai_scan, domain_name): 'ai_findings',
+            executor.submit(run_sensitive_data_scan, domain_name): 'sensitive_data_exposure'
         }
 
-        for scan_type, future in futures.items():
+        for future in as_completed(futures):
+            scan_type = futures[future]
             try:
                 result = future.result()
                 scan_results['findings'][scan_type] = result
-                print(f"[+] {scan_type.replace('_', ' ').title()} completed")
+                CloudLogger.log(f"{scan_type.replace('_', ' ').title()} completed", "SUCCESS")
+                
+                # Immediate feedback on findings count
+                if isinstance(result, list):
+                    count = len(result)
+                elif isinstance(result, dict):
+                    count = len(result.get('findings', [])) if 'findings' in result else len(result)
+                else:
+                    count = 0
+                
+                if count > 0:
+                     CloudLogger.log(f"  -> Found {count} issues in {scan_type.replace('_', ' ')}", "WARNING")
+
             except Exception as e:
-                print(f"[-] Error in {scan_type}: {str(e)}")
+                CloudLogger.log(f"Error in {scan_type}: {str(e)}", "ERROR")
                 scan_results['findings'][scan_type] = {'error': str(e)}
 
     # Generate advanced report
@@ -1742,6 +1777,12 @@ def run_ai_scan(domain_name):
         return detector.analyze_response(response.text)
     except Exception as e:
         return {'error': str(e)}
+
+def run_sensitive_data_scan(domain_name):
+    """Run sensitive data exposure scan"""
+    domain_with_scheme = ensure_url_scheme(domain_name)
+    tester = SensitiveDataExposureTester(domain_with_scheme)
+    return tester.run_tests()
 
 
 def ensure_url_scheme(domain):
@@ -1837,9 +1878,10 @@ if __name__ == "__main__":
             print("19. Comprehensive Security Scan")
             print("20. Running Security Tool Integration")
             print("21. Advanced Report Generation")
-            print("22. Exit\n")
+            print("22. Sensitive Data Exposure Check")
+            print("23. Exit\n")
 
-            choice = input("Enter a choice from the given options (1-22): ")
+            choice = input("Enter a choice from the given options (1-23): ")
 
             if choice == '1':
                 break
@@ -2159,6 +2201,28 @@ if __name__ == "__main__":
                     print("\n[-] No scan results available. Run scans first.")
 
             elif choice == '22':
+                # Sensitive Data Exposure
+                print("\n[*] Running Sensitive Data Exposure Check...")
+                domain_with_scheme = ensure_url_scheme(domain_name)
+                tester = SensitiveDataExposureTester(domain_with_scheme)
+                
+                try:
+                    results = tester.run_tests()
+                    
+                    # Store results
+                    if 'findings' not in scan_results:
+                        scan_results['findings'] = {}
+                    
+                    scan_results['findings']['sensitive_data'] = results
+                    print("\n[+] Sensitive Data Exposure Check completed")
+                    
+                    for finding in results:
+                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                        
+                except Exception as e:
+                    print(f"\n[-] Error during sensitive data check: {e}")
+
+            elif choice == '23':
                 if scan_results['findings']:
                     print("\n[*] Generating Advanced Security Report...")
                     reporter = AdvancedSecurityReporter(
@@ -2171,4 +2235,4 @@ if __name__ == "__main__":
                 print("Thank you for using VulnScan\nExiting...")
                 sys.exit()
             else:
-                print("\nInvalid option. Please enter a valid option (1-22)")
+                print("\nInvalid option. Please enter a valid option (1-23)")
