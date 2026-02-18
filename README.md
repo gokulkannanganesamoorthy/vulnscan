@@ -8,7 +8,7 @@
 
 ## 🚀 Features
 
-VulnScan currently includes **24 powerful modules**:
+VulnScan currently includes **23 powerful modules**:
 
 1. Change Target Domain
    - Function: `ensure_url_scheme`
