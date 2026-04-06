@@ -8,7 +8,7 @@
 
 ## 🚀 Features
 
-VulnScan currently includes **26 powerful modules**:
+VulnScan currently includes **25 powerful modules**:
 
 1. Change Target Domain
    - Function: `ensure_url_scheme`
@@ -98,7 +98,7 @@ VulnScan currently includes **26 powerful modules**:
 
 > Each module is plug-and-play and optimized for fast, accurate results.
 
-### 🌟 v3.4.5 "Production Level" Upgrades
+### 🌟 v3.4.6 "Production Level" Upgrades
 
 - **Real-Time Logging**: Findings are streamed instantly to the console as they are discovered.
 - **Parallel Scanning**: All modules run concurrently for maximum speed.

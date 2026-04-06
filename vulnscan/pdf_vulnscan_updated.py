@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+import sys
+import os
+# Allow direct script execution when using absolute package imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
 from xml.sax.saxutils import escape
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -1906,12 +1914,11 @@ if __name__ == "__main__":
             print("20. Running Security Tool Integration")
             print("21. Advanced Report Generation")
             print("22. Sensitive Data Exposure Check")
-            print("23. Advanced Report Generation (PDF)")
-            print("24. Wireless Controller Scan (WLC)")
-            print("25. WSN/IoT API Auditor (5G Core)")
-            print("26. Exit\n")
+            print("23. Wireless Controller Scan (WLC)")
+            print("24. WSN/IoT API Auditor (5G Core)")
+            print("25. Exit\n")
 
-            choice = input("Enter a choice from the given options (1-26): ")
+            choice = input("Enter a choice from the given options (1-25): ")
 
             if choice == '1':
                 break
@@ -2252,7 +2259,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"\n[-] Error during sensitive data check: {e}")
 
-            elif choice == '24':
+            elif choice == '23':
                 # Wireless Controller Scan (WLC)
                 print("\n[*] Running Wireless Controller Scan (WLC)...")
                 domain_with_scheme = ensure_url_scheme(domain_name)
@@ -2273,7 +2280,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"\n[-] Error during WLC scan: {e}")
 
-            elif choice == '25':
+            elif choice == '24':
                 # WSN/IoT API Auditor
                 print("\n[*] Running WSN/IoT API Auditor (5G Core / Sensors)...")
                 domain_with_scheme = ensure_url_scheme(domain_name)
@@ -2294,8 +2301,8 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"\n[-] Error during WSN API scan: {e}")
 
-            elif choice == '26':
+            elif choice == '25':
                 print("Thank you for using VulnScan\nExiting...")
                 sys.exit()
             else:
-                print("\nInvalid option. Please enter a valid option (1-26)")
+                print("\nInvalid option. Please enter a valid option (1-25)")

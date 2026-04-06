@@ -1,4 +1,3 @@
-LICENSE
 README.md
 pyproject.toml
 vulnscan/__init__.py
@@ -35,4 +34,6 @@ vulnscan/modules/modern_security_platform.py
 vulnscan/modules/security_tool_integration.py
 vulnscan/modules/sensitive_data_exposure.py
 vulnscan/modules/web_app_checking.py
+vulnscan/modules/wireless_controller_scanner.py
+vulnscan/modules/wsn_iot_api_auditor.py
 vulnscan/venv/bin/jp.py
