@@ -227,3 +227,5 @@ output/
 # Virtual environment specific
 .env.local
 .env.*.local
+
+.env
