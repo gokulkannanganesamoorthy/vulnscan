@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+import sys
+import os
+# Allow direct script execution when using absolute package imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
 from xml.sax.saxutils import escape
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -58,6 +66,10 @@ import secrets
 import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Wireless Modules
+from vulnscan.modules.wireless_controller_scanner import WirelessControllerScanner
+from vulnscan.modules.wsn_iot_api_auditor import WSNApiAuditor
 from vulnscan.modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
 from vulnscan.modules.advanced_reporting import AdvancedSecurityReporter
 from vulnscan.modules.ai_powered_checking import AIVulnerabilityDetector
@@ -1801,6 +1813,18 @@ def run_comprehensive_scan(domain_name):
     platform = ModernSecurityPlatform(domain_name, config={})
     results = platform.run_comprehensive_scan()
 
+    # Run Wireless Security Modules
+    try:
+        wlc = WirelessControllerScanner(domain_name)
+        wlc_res = wlc.run_tests()
+        results['wlc_scan'] = wlc_res
+
+        wsn = WSNApiAuditor(domain_name)
+        wsn_res = wsn.run_tests()
+        results['wsn_api_scan'] = wsn_res
+    except Exception as e:
+        print(f"[-] Error running wireless modules in comprehensive scan: {e}")
+
     # Update global results
     global scan_results
     scan_results.update(results)
@@ -1837,410 +1861,445 @@ def generate_advanced_report(domain_name):
 def main():
     if __name__ == "__main__":
 
-    # Initialize global results dictionary
+        # Initialize global results dictionary
 
-    global scan_results
-    scan_results = {
-        'target': '',
-        'timestamp': '',
-        'findings': {}
-    }
-
-    while True:
-        domain_name = input("\nEnter the target domain : ")
-        domain_name = ensure_url_scheme(domain_name)
-        scan_results['target'] = domain_name
-        scan_results['timestamp'] = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S")
-
-        options, args = get_args()
-        ip_address = get_ip_address(domain_name)
-
-        if ip_address:
-            print('IP Address : ', ip_address)
-        else:
-            print('Could not resolve IP address. Continuing with domain name.')
+        global scan_results
+        scan_results = {
+            'target': '',
+            'timestamp': '',
+            'findings': {}
+        }
 
         while True:
-            print("\n1. Change Domain")
-            print("2. Port Scan")
-            print("3. Domain Enumeration")
-            print("4. Domain Fingerprinting")
-            print("5. SQL Injection Testing")
-            print("6. XSS Testing")
-            print("7. CSRF Detection")
-            print("8. SSL/TLS Certificate Detection")
-            print("9. Location of the Server")
-            print("10. Directory Enumeration")
-            print("11. Web Application Vulnerability Scanning")
-            print("12. Crawling and Spidering")
-            print("13. WAF Detection")
-            print("14. Advanced Domain Enumeration")
-            print("15. Cloud Vulnerability Scan")
-            print("16. Advanced Web Application Scan")
-            print("17. API Security Testing")
-            print("18. AI-Powered Vulnerability Detection")
-            print("19. Comprehensive Security Scan")
-            print("20. Running Security Tool Integration")
-            print("21. Advanced Report Generation")
-            print("22. Sensitive Data Exposure Check")
-            print("23. Exit\n")
+            domain_name = input("\nEnter the target domain : ")
+            domain_name = ensure_url_scheme(domain_name)
+            scan_results['target'] = domain_name
+            scan_results['timestamp'] = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S")
 
-            choice = input("Enter a choice from the given options (1-23): ")
+            options, args = get_args()
+            ip_address = get_ip_address(domain_name)
 
-            if choice == '1':
-                break
-            elif choice == '2':
-                # Port Scan
-                print("\n[*] Running Port Scan...")
-                port_scan_results = []  # Initialize
+            if ip_address:
+                print('IP Address : ', ip_address)
+            else:
+                print('Could not resolve IP address. Continuing with domain name.')
 
-                while True:
-                    print("\nPort Scanning Options:")
-                    print("\n1. Scan a single port")
-                    print("2. Scan custom ports")
-                    print("3. Scan a range of ports")
-                    print("4. Exit Port Scan\n")
-                    try:
-                        port_option = int(
-                            input("\nEnter your choice (1, 2, 3, or 4): "))
-                        if port_option == 1:
-                            port = input("\nEnter the port number to scan: ")
-                            start_time = time.time()
-                            result = scan_single_port(domain_name, port)
-                            port_scan_results.extend(result)
-                            elapsed_time = time.time() - start_time
-                            print(f"Elapsed time: {elapsed_time:.2f} seconds")
-                        elif port_option == 2:
-                            ports_input = input(
-                                "\nEnter the port numbers to scan (comma-separated): ")
-                            ports = [int(port.strip())
-                                     for port in ports_input.split(",")]
-                            start_time = time.time()
-                            result = scan_custom_ports(domain_name, ports)
-                            port_scan_results.extend(result)
-                            elapsed_time = time.time() - start_time
-                            print(f"Elapsed time: {elapsed_time:.2f} seconds")
-                        elif port_option == 3:
-                            start_port, end_port = map(int, input(
-                                "\nEnter the port range to scan (e.g., 1-65535): ").split("-"))
-                            start_time = time.time()
-                            result = scan_range_of_ports(
-                                domain_name, start_port, end_port)
-                            port_scan_results.extend(result)
-                            elapsed_time = time.time() - start_time
-                            print(f"Elapsed time: {elapsed_time:.2f} seconds")
-                        elif port_option == 4:
-                            print("\nExiting Port Scan...\n")
-                            break
-                        else:
+            while True:
+                print("\n1. Change Domain")
+                print("2. Port Scan")
+                print("3. Domain Enumeration")
+                print("4. Domain Fingerprinting")
+                print("5. SQL Injection Testing")
+                print("6. XSS Testing")
+                print("7. CSRF Detection")
+                print("8. SSL/TLS Certificate Detection")
+                print("9. Location of the Server")
+                print("10. Directory Enumeration")
+                print("11. Web Application Vulnerability Scanning")
+                print("12. Crawling and Spidering")
+                print("13. WAF Detection")
+                print("14. Advanced Domain Enumeration")
+                print("15. Cloud Vulnerability Scan")
+                print("16. Advanced Web Application Scan")
+                print("17. API Security Testing")
+                print("18. AI-Powered Vulnerability Detection")
+                print("19. Comprehensive Security Scan")
+                print("20. Running Security Tool Integration")
+                print("21. Advanced Report Generation")
+                print("22. Sensitive Data Exposure Check")
+                print("23. Wireless Controller Scan (WLC)")
+                print("24. WSN/IoT API Auditor (5G Core)")
+                print("25. Exit\n")
+
+                choice = input("Enter a choice from the given options (1-25): ")
+
+                if choice == '1':
+                    break
+                elif choice == '2':
+                    # Port Scan
+                    print("\n[*] Running Port Scan...")
+                    port_scan_results = []  # Initialize
+
+                    while True:
+                        print("\nPort Scanning Options:")
+                        print("\n1. Scan a single port")
+                        print("2. Scan custom ports")
+                        print("3. Scan a range of ports")
+                        print("4. Exit Port Scan\n")
+                        try:
+                            port_option = int(
+                                input("\nEnter your choice (1, 2, 3, or 4): "))
+                            if port_option == 1:
+                                port = input("\nEnter the port number to scan: ")
+                                start_time = time.time()
+                                result = scan_single_port(domain_name, port)
+                                port_scan_results.extend(result)
+                                elapsed_time = time.time() - start_time
+                                print(f"Elapsed time: {elapsed_time:.2f} seconds")
+                            elif port_option == 2:
+                                ports_input = input(
+                                    "\nEnter the port numbers to scan (comma-separated): ")
+                                ports = [int(port.strip())
+                                        for port in ports_input.split(",")]
+                                start_time = time.time()
+                                result = scan_custom_ports(domain_name, ports)
+                                port_scan_results.extend(result)
+                                elapsed_time = time.time() - start_time
+                                print(f"Elapsed time: {elapsed_time:.2f} seconds")
+                            elif port_option == 3:
+                                start_port, end_port = map(int, input(
+                                    "\nEnter the port range to scan (e.g., 1-65535): ").split("-"))
+                                start_time = time.time()
+                                result = scan_range_of_ports(
+                                    domain_name, start_port, end_port)
+                                port_scan_results.extend(result)
+                                elapsed_time = time.time() - start_time
+                                print(f"Elapsed time: {elapsed_time:.2f} seconds")
+                            elif port_option == 4:
+                                print("\nExiting Port Scan...\n")
+                                break
+                            else:
+                                print(
+                                    "\nInvalid option. Please enter a valid option (1, 2, 3, or 4)")
+                        except ValueError:
                             print(
-                                "\nInvalid option. Please enter a valid option (1, 2, 3, or 4)")
-                    except ValueError:
-                        print(
-                            "\nInvalid input. Please enter a valid option (1, 2, 3, or 4)")
-
-                # Store results in scan_results
-                scan_results['findings']['port_scan'] = port_scan_results
-                print("\n[+] Port Scan completed")
-
-            elif choice == '3':
-                # Domain Enumeration
-                print("\n[*] Running Domain Enumeration...")
-                q = queue.Queue()
-                for subdomain in from_file(options.input_list):
-                    q.put(subdomain)
-                bar = Bar("Subdomain scanning...", max=q.qsize())
-                session = requests.Session()
-                session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
-                active_domains = []
-                lock = threading.Lock()
-                q = queue.Queue()
-                for subdomain in from_file(options.input_list):
-                    q.put(subdomain)
-                threads = []
-                for i in range(options.n_threads):
-                    t = threading.Thread(target=get_active)
-                    t.daemon = True
-                    t.start()
-                    threads.append(t)
-                for t in threads:
-                    t.join()
-
-                # Store results in scan_results
-                scan_results['findings']['domain_enumeration'] = active_domains
-                print("\n[+] Domain Enumeration completed")
-
-            elif choice == '4':
-                # Domain Fingerprinting
-                print("\n[*] Running Domain Fingerprinting...")
-                server_info = []
-                get_server_info(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['domain_fingerprinting'] = server_info
-                print("\n[+] Domain Fingerprinting completed")
-
-            elif choice == '5':
-                # SQL Injection Testing
-                print("\n[*] Running SQL Injection Testing...")
-                sql_test_results = []
-                test_sql_injection(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['sql_injection'] = sql_test_results
-                print("\n[+] SQL Injection Testing completed")
-
-            elif choice == '6':
-                # XSS Testing
-                print("\n[*] Running XSS Testing...")
-                colorama.init()
-                xss_test_results = []
-                scan_xss(domain_name)
-                colorama.deinit()
-
-                # Store results in scan_results
-                scan_results['findings']['xss'] = xss_test_results
-                print("\n[+] XSS Testing completed")
-
-            elif choice == '7':
-                # CSRF Detection
-                print("\n[*] Running CSRF Detection...")
-                csrf_results = []
-                csrf(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['csrf'] = csrf_results
-                print("\n[+] CSRF Detection completed")
-
-            elif choice == '8':
-                # SSL/TLS Certificate Detection
-                print("\n[*] Running SSL/TLS Certificate Detection...")
-                domain = domain_name
-                port = 443
-                certificate_results = []
-                certificate(domain_name)
-                analyze_certificate(domain, port)
-
-                # Store results in scan_results
-                scan_results['findings']['certificate'] = certificate_results
-                print("\n[+] SSL/TLS Certificate Detection completed")
-
-            elif choice == '9':
-                # Location of the Server
-                print("\n[*] Getting Server Location...")
-                api_key = os.getenv("API_KEY")
-                location_data = get_location(ip_address, api_key)
-                if location_data:
-                    print("\nLocation Information:")
-                    for key, value in location_data.items():
-                        print(f"{key}: {value}")
-
-                # Store results in scan_results
-                scan_results['findings']['location'] = location_data
-                print("\n[+] Server Location completed")
-
-            elif choice == '10':
-                # Directory Enumeration
-                print("\n[*] Running Directory Enumeration...")
-                directory_results = []
-                directory_enumeration(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['directory_enumeration'] = directory_results
-                print("\n[+] Directory Enumeration completed")
-
-            elif choice == '11':
-                # Web Application Vulnerability Scanning
-                print("\n[*] Running Web Application Vulnerability Scanning...")
-                vulnerability_results = []
-                web_application_vulnerability_scanner(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['web_app_vulnerabilities'] = vulnerability_results
-                print("\n[+] Web Application Vulnerability Scanning completed")
-
-            elif choice == '12':
-                # Crawling and Spidering
-                print("\n[*] Running Crawling and Spidering...")
-                crawl_results = []
-                crawl_and_spider(domain_name)
-
-                # Store results in scan_results
-                scan_results['findings']['crawling'] = crawl_results
-                print("\n[+] Crawling and Spidering completed")
-
-            elif choice == '13':
-                # WAF Detection
-                print("\n[*] Running WAF Detection...")
-                waf_results = []
-                is_secure = detect_waf(domain_name)
-                if is_secure:
-                    waf_results.append({
-                        'type': 'WAF Detection',
-                        'severity': 'Info',
-                        'description': f"The URL {domain_name} has strong security headers."
-                    })
-                else:
-                    waf_results.append({
-                        'type': 'WAF Detection',
-                        'severity': 'Medium',
-                        'description': f"The URL {domain_name} does not have strong security headers."
-                    })
-
-                # Store results in scan_results
-                scan_results['findings']['waf_detection'] = waf_results
-                print("\n[+] WAF Detection completed")
-
-            elif choice == '14':
-                # Advanced Domain Enumeration
-                print("\n[*] Running Advanced Domain Enumeration...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                enumerator = AdvancedSubdomainEnumerator(domain_with_scheme)
-                results = enumerator.run_enumeration()
-
-                # Store results in scan_results
-                scan_results['findings']['advanced_domain_enumeration'] = results
-                print("\n[+] Advanced Domain Enumeration completed")
-
-            elif choice == '15':
-                # Cloud Vulnerability Scan
-                print("\n[*] Running Cloud Vulnerability Scan...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                scanner = CloudSecurityScanner(domain_with_scheme)
-                results = scanner.run_scan()
-
-                # Store results in scan_results
-                scan_results['findings']['cloud_vulnerabilities'] = results
-                print("\n[+] Cloud Vulnerability Scan completed")
-
-            elif choice == '16':
-                # Advanced Web Application Scan
-                print("\n[*] Running Advanced Web Application Scan...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                scanner = AdvancedWebAppTester(domain_with_scheme)
-                results = scanner.run_tests()
-
-                # Store results in scan_results
-                scan_results['findings']['advanced_web_app_scan'] = results
-                print("\n[+] Advanced Web Application Scan completed")
-
-            elif choice == '17':
-                # API Security Testing
-                print("\n[*] Running API Security Testing...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                graphql_tester = GraphQLSecurityTester(domain_with_scheme)
-                graphql_results = graphql_tester.run_tests()
-
-                api_tester = APISecurityTester(domain_with_scheme)
-                api_results = api_tester.run_tests()
-
-                results = {
-                    'graphql': graphql_results,
-                    'general': api_results
-                }
-
-                # Store results in scan_results
-                scan_results['findings']['api_security'] = results
-                print("\n[+] API Security Testing completed")
-
-            elif choice == '18':
-                # AI-Powered Vulnerability Detection
-                print("\n[*] Running AI-Powered Vulnerability Detection...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                detector = AIVulnerabilityDetector()
-
-                try:
-                    response = requests.get(
-                        domain_with_scheme, headers=headers, timeout=10)
-                    results = detector.analyze_response(response.text)
+                                "\nInvalid input. Please enter a valid option (1, 2, 3, or 4)")
 
                     # Store results in scan_results
-                    scan_results['findings']['ai_findings'] = results
-                    print("\n[+] AI-Powered Vulnerability Detection completed")
-                except Exception as e:
-                    scan_results['findings']['ai_findings'] = {'error': str(e)}
-                    print(f"\n[-] Error during AI scan: {e}")
+                    scan_results['findings']['port_scan'] = port_scan_results
+                    print("\n[+] Port Scan completed")
 
-            elif choice == '19':
-                # Comprehensive Security Scan
-                print("\n[*] Running Comprehensive Security Scan...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                results = run_comprehensive_scan(domain_with_scheme)
+                elif choice == '3':
+                    # Domain Enumeration
+                    print("\n[*] Running Domain Enumeration...")
+                    q = queue.Queue()
+                    for subdomain in from_file(options.input_list):
+                        q.put(subdomain)
+                    bar = Bar("Subdomain scanning...", max=q.qsize())
+                    session = requests.Session()
+                    session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+                    active_domains = []
+                    lock = threading.Lock()
+                    q = queue.Queue()
+                    for subdomain in from_file(options.input_list):
+                        q.put(subdomain)
+                    threads = []
+                    for i in range(options.n_threads):
+                        t = threading.Thread(target=get_active)
+                        t.daemon = True
+                        t.start()
+                        threads.append(t)
+                    for t in threads:
+                        t.join()
 
-                # Update scan_results with comprehensive scan results
-                scan_results.update(results)
-                print("\n[+] Comprehensive Security Scan completed")
+                    # Store results in scan_results
+                    scan_results['findings']['domain_enumeration'] = active_domains
+                    print("\n[+] Domain Enumeration completed")
 
-            elif choice == '20':
-                # Security Tool Integration
-                print("\n[*] Running Security Tool Integration...")
+                elif choice == '4':
+                    # Domain Fingerprinting
+                    print("\n[*] Running Domain Fingerprinting...")
+                    server_info = []
+                    get_server_info(domain_name)
 
-                if scan_results['findings']:
+                    # Store results in scan_results
+                    scan_results['findings']['domain_fingerprinting'] = server_info
+                    print("\n[+] Domain Fingerprinting completed")
+
+                elif choice == '5':
+                    # SQL Injection Testing
+                    print("\n[*] Running SQL Injection Testing...")
+                    sql_test_results = []
+                    test_sql_injection(domain_name)
+
+                    # Store results in scan_results
+                    scan_results['findings']['sql_injection'] = sql_test_results
+                    print("\n[+] SQL Injection Testing completed")
+
+                elif choice == '6':
+                    # XSS Testing
+                    print("\n[*] Running XSS Testing...")
+                    colorama.init()
+                    xss_test_results = []
+                    scan_xss(domain_name)
+                    colorama.deinit()
+
+                    # Store results in scan_results
+                    scan_results['findings']['xss'] = xss_test_results
+                    print("\n[+] XSS Testing completed")
+
+                elif choice == '7':
+                    # CSRF Detection
+                    print("\n[*] Running CSRF Detection...")
+                    csrf_results = []
+                    csrf(domain_name)
+
+                    # Store results in scan_results
+                    scan_results['findings']['csrf'] = csrf_results
+                    print("\n[+] CSRF Detection completed")
+
+                elif choice == '8':
+                    # SSL/TLS Certificate Detection
+                    print("\n[*] Running SSL/TLS Certificate Detection...")
+                    domain = domain_name
+                    port = 443
+                    certificate_results = []
+                    certificate(domain_name)
+                    analyze_certificate(domain, port)
+
+                    # Store results in scan_results
+                    scan_results['findings']['certificate'] = certificate_results
+                    print("\n[+] SSL/TLS Certificate Detection completed")
+
+                elif choice == '9':
+                    # Location of the Server
+                    print("\n[*] Getting Server Location...")
+                    api_key = os.getenv("API_KEY")
+                    location_data = get_location(ip_address, api_key)
+                    if location_data:
+                        print("\nLocation Information:")
+                        for key, value in location_data.items():
+                            print(f"{key}: {value}")
+
+                    # Store results in scan_results
+                    scan_results['findings']['location'] = location_data
+                    print("\n[+] Server Location completed")
+
+                elif choice == '10':
+                    # Directory Enumeration
+                    print("\n[*] Running Directory Enumeration...")
+                    directory_results = []
+                    directory_enumeration(domain_name)
+
+                    # Store results in scan_results
+                    scan_results['findings']['directory_enumeration'] = directory_results
+                    print("\n[+] Directory Enumeration completed")
+
+                elif choice == '11':
+                    # Web Application Vulnerability Scanning
+                    print("\n[*] Running Web Application Vulnerability Scanning...")
+                    vulnerability_results = []
+                    web_application_vulnerability_scanner(domain_name)
+
+                    # Store results in scan_results
+                    scan_results['findings']['web_app_vulnerabilities'] = vulnerability_results
+                    print("\n[+] Web Application Vulnerability Scanning completed")
+
+                elif choice == '12':
+                    # Crawling and Spidering
+                    print("\n[*] Running Crawling and Spidering...")
+                    crawl_results = []
+                    crawl_and_spider(domain_name)
+
+                    # Store results in scan_results
+                    scan_results['findings']['crawling'] = crawl_results
+                    print("\n[+] Crawling and Spidering completed")
+
+                elif choice == '13':
+                    # WAF Detection
+                    print("\n[*] Running WAF Detection...")
+                    waf_results = []
+                    is_secure = detect_waf(domain_name)
+                    if is_secure:
+                        waf_results.append({
+                            'type': 'WAF Detection',
+                            'severity': 'Info',
+                            'description': f"The URL {domain_name} has strong security headers."
+                        })
+                    else:
+                        waf_results.append({
+                            'type': 'WAF Detection',
+                            'severity': 'Medium',
+                            'description': f"The URL {domain_name} does not have strong security headers."
+                        })
+
+                    # Store results in scan_results
+                    scan_results['findings']['waf_detection'] = waf_results
+                    print("\n[+] WAF Detection completed")
+
+                elif choice == '14':
+                    # Advanced Domain Enumeration
+                    print("\n[*] Running Advanced Domain Enumeration...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    enumerator = AdvancedSubdomainEnumerator(domain_with_scheme)
+                    results = enumerator.run_enumeration()
+
+                    # Store results in scan_results
+                    scan_results['findings']['advanced_domain_enumeration'] = results
+                    print("\n[+] Advanced Domain Enumeration completed")
+
+                elif choice == '15':
+                    # Cloud Vulnerability Scan
+                    print("\n[*] Running Cloud Vulnerability Scan...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    scanner = CloudSecurityScanner(domain_with_scheme)
+                    results = scanner.run_scan()
+
+                    # Store results in scan_results
+                    scan_results['findings']['cloud_vulnerabilities'] = results
+                    print("\n[+] Cloud Vulnerability Scan completed")
+
+                elif choice == '16':
+                    # Advanced Web Application Scan
+                    print("\n[*] Running Advanced Web Application Scan...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    scanner = AdvancedWebAppTester(domain_with_scheme)
+                    results = scanner.run_tests()
+
+                    # Store results in scan_results
+                    scan_results['findings']['advanced_web_app_scan'] = results
+                    print("\n[+] Advanced Web Application Scan completed")
+
+                elif choice == '17':
+                    # API Security Testing
+                    print("\n[*] Running API Security Testing...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    graphql_tester = GraphQLSecurityTester(domain_with_scheme)
+                    graphql_results = graphql_tester.run_tests()
+
+                    api_tester = APISecurityTester(domain_with_scheme)
+                    api_results = api_tester.run_tests()
+
+                    results = {
+                        'graphql': graphql_results,
+                        'general': api_results
+                    }
+
+                    # Store results in scan_results
+                    scan_results['findings']['api_security'] = results
+                    print("\n[+] API Security Testing completed")
+
+                elif choice == '18':
+                    # AI-Powered Vulnerability Detection
+                    print("\n[*] Running AI-Powered Vulnerability Detection...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    detector = AIVulnerabilityDetector()
+
                     try:
-                        tool_integration = SecurityToolIntegration()
-                        export_results = tool_integration.export_all(
-                            scan_results, domain_name)
+                        response = requests.get(
+                            domain_with_scheme, headers=headers, timeout=10)
+                        results = detector.analyze_response(response.text)
 
-                        print("\n[+] Export Results:")
-                        for tool, success in export_results.items():
-                            status = "Success" if success else "Failed"
-                            print(f"  - {tool}: {status}")
+                        # Store results in scan_results
+                        scan_results['findings']['ai_findings'] = results
+                        print("\n[+] AI-Powered Vulnerability Detection completed")
                     except Exception as e:
-                        print(f"\n[-] Error during export: {e}")
-                else:
-                    print("\n[-] No scan results available. Run scans first.")
+                        scan_results['findings']['ai_findings'] = {'error': str(e)}
+                        print(f"\n[-] Error during AI scan: {e}")
 
-            elif choice == '21':
-                # Advanced Report Generation
-                if scan_results['findings']:
-                    print("\n[*] Generating Advanced Security Report...")
-                    reporter = AdvancedSecurityReporter(
-                        domain_name, scan_results)
-                    reports = reporter.generate_all_reports()
+                elif choice == '19':
+                    # Comprehensive Security Scan
+                    print("\n[*] Running Comprehensive Security Scan...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    results = run_comprehensive_scan(domain_with_scheme)
 
-                    print("\n[+] Reports generated successfully:")
-                    for format_type, file_path in reports.items():
-                        print(f"  - {format_type.upper()}: {file_path}")
-                else:
-                    print("\n[-] No scan results available. Run scans first.")
+                    # Update scan_results with comprehensive scan results
+                    scan_results.update(results)
+                    print("\n[+] Comprehensive Security Scan completed")
 
-            elif choice == '22':
-                # Sensitive Data Exposure
-                print("\n[*] Running Sensitive Data Exposure Check...")
-                domain_with_scheme = ensure_url_scheme(domain_name)
-                tester = SensitiveDataExposureTester(domain_with_scheme)
-                
-                try:
-                    results = tester.run_tests()
+                elif choice == '20':
+                    # Security Tool Integration
+                    print("\n[*] Running Security Tool Integration...")
+
+                    if scan_results['findings']:
+                        try:
+                            tool_integration = SecurityToolIntegration()
+                            export_results = tool_integration.export_all(
+                                scan_results, domain_name)
+
+                            print("\n[+] Export Results:")
+                            for tool, success in export_results.items():
+                                status = "Success" if success else "Failed"
+                                print(f"  - {tool}: {status}")
+                        except Exception as e:
+                            print(f"\n[-] Error during export: {e}")
+                    else:
+                        print("\n[-] No scan results available. Run scans first.")
+
+                elif choice == '21':
+                    # Advanced Report Generation
+                    if scan_results['findings']:
+                        print("\n[*] Generating Advanced Security Report...")
+                        reporter = AdvancedSecurityReporter(
+                            domain_name, scan_results)
+                        reports = reporter.generate_all_reports()
+
+                        print("\n[+] Reports generated successfully:")
+                        for format_type, file_path in reports.items():
+                            print(f"  - {format_type.upper()}: {file_path}")
+                    else:
+                        print("\n[-] No scan results available. Run scans first.")
+
+                elif choice == '22':
+                    # Sensitive Data Exposure
+                    print("\n[*] Running Sensitive Data Exposure Check...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    tester = SensitiveDataExposureTester(domain_with_scheme)
                     
-                    # Store results
-                    if 'findings' not in scan_results:
-                        scan_results['findings'] = {}
-                    
-                    scan_results['findings']['sensitive_data'] = results
-                    print("\n[+] Sensitive Data Exposure Check completed")
-                    
-                    for finding in results:
-                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                    try:
+                        results = tester.run_tests()
                         
-                except Exception as e:
-                    print(f"\n[-] Error during sensitive data check: {e}")
+                        # Store results
+                        if 'findings' not in scan_results:
+                            scan_results['findings'] = {}
+                        
+                        scan_results['findings']['sensitive_data'] = results
+                        print("\n[+] Sensitive Data Exposure Check completed")
+                        
+                        for finding in results:
+                            print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                            
+                    except Exception as e:
+                        print(f"\n[-] Error during sensitive data check: {e}")
 
-            elif choice == '23':
-                if scan_results['findings']:
-                    print("\n[*] Generating Advanced Security Report...")
-                    reporter = AdvancedSecurityReporter(
-                        domain_name, scan_results)
-                    reports = reporter.generate_all_reports()
+                elif choice == '23':
+                    # Wireless Controller Scan (WLC)
+                    print("\n[*] Running Wireless Controller Scan (WLC)...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    wlc_scanner = WirelessControllerScanner(domain_with_scheme)
+                    
+                    try:
+                        results = wlc_scanner.run_tests()
+                        
+                        if 'findings' not in scan_results:
+                            scan_results['findings'] = {}
+                            
+                        scan_results['findings']['wlc_scan'] = results
+                        print("\n[+] Wireless Controller Scan completed")
+                        
+                        for finding in results:
+                            print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                            
+                    except Exception as e:
+                        print(f"\n[-] Error during WLC scan: {e}")
 
-                    print("\n[+] Reports generated successfully:")
-                    for format_type, file_path in reports.items():
-                        print(f"  - {format_type.upper()}: {file_path}")
-                print("Thank you for using VulnScan\nExiting...")
-                sys.exit()
-            else:
-                print("\nInvalid option. Please enter a valid option (1-23)")
+                elif choice == '24':
+                    # WSN/IoT API Auditor
+                    print("\n[*] Running WSN/IoT API Auditor (5G Core / Sensors)...")
+                    domain_with_scheme = ensure_url_scheme(domain_name)
+                    wsn_auditor = WSNApiAuditor(domain_with_scheme)
+                    
+                    try:
+                        results = wsn_auditor.run_tests()
+                        
+                        if 'findings' not in scan_results:
+                            scan_results['findings'] = {}
+                            
+                        scan_results['findings']['wsn_api_scan'] = results
+                        print("\n[+] WSN/IoT API Auditor Scan completed")
+                        
+                        for finding in results:
+                            print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                            
+                    except Exception as e:
+                        print(f"\n[-] Error during WSN API scan: {e}")
+
+                elif choice == '25':
+                    print("Thank you for using VulnScan\nExiting...")
+                    sys.exit()
+                else:
+                    print("\nInvalid option. Please enter a valid option (1-25)")
 
 
 

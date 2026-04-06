@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+import sys
+import os
+# Allow direct script execution when using absolute package imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
 from xml.sax.saxutils import escape
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -58,6 +66,10 @@ import secrets
 import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Wireless Modules
+from vulnscan.modules.wireless_controller_scanner import WirelessControllerScanner
+from vulnscan.modules.wsn_iot_api_auditor import WSNApiAuditor
 from vulnscan.modules.advanced_api_checking import GraphQLSecurityTester, APISecurityTester
 from vulnscan.modules.advanced_reporting import AdvancedSecurityReporter
 from vulnscan.modules.ai_powered_checking import AIVulnerabilityDetector
@@ -1658,6 +1670,29 @@ def generate_report(domain_name, ip_address, options, args, active_domains=None,
             content.append(Paragraph(str(info), styles['Normal']))
         content.append(Spacer(1, 12))
 
+    if scan_results.get('findings', {}).get('wlc_scan'):
+        content.append(
+            Paragraph("<b>Wireless LAN Controller (WLC) Security Test:</b>", styles['Heading2']))
+        wlc_issues = scan_results['findings']['wlc_scan']
+        for issue in wlc_issues:
+             desc = issue.get('description', '')
+             severity = issue.get('severity', 'Info')
+             sanitized_info = escape(f"[{severity}] {desc}")
+             content.append(Paragraph(sanitized_info, styles['Normal']))
+        content.append(Spacer(1, 12))
+
+    if scan_results.get('findings', {}).get('wsn_api_scan'):
+        content.append(
+            Paragraph("<b>WSN & IoT API (5G Core) Security Test:</b>", styles['Heading2']))
+        wsn_issues = scan_results['findings']['wsn_api_scan']
+        for issue in wsn_issues:
+             desc = issue.get('description', '')
+             severity = issue.get('severity', 'Info')
+             sanitized_info = escape(f"[{severity}] {desc}")
+             content.append(Paragraph(sanitized_info, styles['Normal']))
+        content.append(Spacer(1, 12))
+
+
     doc.build(content)
     print(f"\nReport generated: {report_filename}")
 
@@ -1879,9 +1914,11 @@ if __name__ == "__main__":
             print("20. Running Security Tool Integration")
             print("21. Advanced Report Generation")
             print("22. Sensitive Data Exposure Check")
-            print("23. Exit\n")
+            print("23. Wireless Controller Scan (WLC)")
+            print("24. WSN/IoT API Auditor (5G Core)")
+            print("25. Exit\n")
 
-            choice = input("Enter a choice from the given options (1-23): ")
+            choice = input("Enter a choice from the given options (1-25): ")
 
             if choice == '1':
                 break
@@ -2223,16 +2260,49 @@ if __name__ == "__main__":
                     print(f"\n[-] Error during sensitive data check: {e}")
 
             elif choice == '23':
-                if scan_results['findings']:
-                    print("\n[*] Generating Advanced Security Report...")
-                    reporter = AdvancedSecurityReporter(
-                        domain_name, scan_results)
-                    reports = reporter.generate_all_reports()
+                # Wireless Controller Scan (WLC)
+                print("\n[*] Running Wireless Controller Scan (WLC)...")
+                domain_with_scheme = ensure_url_scheme(domain_name)
+                wlc_scanner = WirelessControllerScanner(domain_with_scheme)
+                
+                try:
+                    results = wlc_scanner.run_tests()
+                    
+                    if 'findings' not in scan_results:
+                        scan_results['findings'] = {}
+                        
+                    scan_results['findings']['wlc_scan'] = results
+                    print("\n[+] Wireless Controller Scan completed")
+                    
+                    for finding in results:
+                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                        
+                except Exception as e:
+                    print(f"\n[-] Error during WLC scan: {e}")
 
-                    print("\n[+] Reports generated successfully:")
-                    for format_type, file_path in reports.items():
-                        print(f"  - {format_type.upper()}: {file_path}")
+            elif choice == '24':
+                # WSN/IoT API Auditor
+                print("\n[*] Running WSN/IoT API Auditor (5G Core / Sensors)...")
+                domain_with_scheme = ensure_url_scheme(domain_name)
+                wsn_auditor = WSNApiAuditor(domain_with_scheme)
+                
+                try:
+                    results = wsn_auditor.run_tests()
+                    
+                    if 'findings' not in scan_results:
+                        scan_results['findings'] = {}
+                        
+                    scan_results['findings']['wsn_api_scan'] = results
+                    print("\n[+] WSN/IoT API Auditor Scan completed")
+                    
+                    for finding in results:
+                        print(f"  - [{finding.get('severity', 'Info')}] {finding.get('description', '')}")
+                        
+                except Exception as e:
+                    print(f"\n[-] Error during WSN API scan: {e}")
+
+            elif choice == '25':
                 print("Thank you for using VulnScan\nExiting...")
                 sys.exit()
             else:
-                print("\nInvalid option. Please enter a valid option (1-23)")
+                print("\nInvalid option. Please enter a valid option (1-25)")
