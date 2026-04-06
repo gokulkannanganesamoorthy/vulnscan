@@ -1,12 +1,12 @@
-# 🔍 VulnScan
+# VulnScan
 
 **VulnScan** is a powerful and lightweight **Web Penetration Testing Toolkit** developed over 3 years of research, crafted to assist ethical hackers, security researchers, and developers in identifying web application vulnerabilities quickly and efficiently.
 
-> ⚡ Built with passion. Backed by real-world interviews. Recognized by industry leaders.
+> Built with passion. Backed by real-world interviews. Recognized by industry leaders.
 
 ---
 
-## 🚀 Features
+## Features
 
 VulnScan currently includes **23 powerful modules**:
 
@@ -90,7 +90,7 @@ VulnScan currently includes **23 powerful modules**:
 
 > Each module is plug-and-play and optimized for fast, accurate results.
 
-### 🌟 v3.4.5 "Production Level" Upgrades
+### v3.4.5 "Production Level" Upgrades
 
 - **Real-Time Logging**: Findings are streamed instantly to the console as they are discovered.
 - **Parallel Scanning**: All modules run concurrently for maximum speed.
@@ -100,7 +100,7 @@ VulnScan currently includes **23 powerful modules**:
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 git clone https://github.com/gokulkannanganesamoorthy/vulnscan.git
