@@ -2,7 +2,7 @@
 
 **VulnScan** is a powerful and lightweight **Web Penetration Testing Toolkit** developed over 3 years of research, crafted to assist ethical hackers, security researchers, and developers in identifying web application vulnerabilities quickly and efficiently.
 
-> ⚡ Built with passion. Backed by real-world interviews. Recognized by industry leaders.
+> Built with passion. Backed by real-world interviews. Recognized by industry leaders.
 
 ---
 
