@@ -1,5 +1,8 @@
 import re
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 from bs4 import BeautifulSoup
 import requests
 
@@ -9,6 +12,9 @@ class AIVulnerabilityDetector:
         """Initialize AI-powered vulnerability detector with fallback to rule-based detection"""
         self.models_available = False
         self.models = {}
+
+        if np is None:
+            print("[!] numpy not found. AI-powered checks will be limited.")
 
         # Try to load pre-trained models
         try:
