@@ -1,0 +1,5 @@
+vulnscan (3.4.7-1) unstable; urgency=medium
+
+  * Initial release for Kali Linux inclusion.
+
+ -- Gokul Kannan <gokulkannan.dev@gmail.com>  Tue, 07 Apr 2026 09:57:07 +0530

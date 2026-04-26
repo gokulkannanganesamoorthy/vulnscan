@@ -1,0 +1,53 @@
+Source: vulnscan
+Section: python
+Priority: optional
+Maintainer: Gokul Kannan <gokulkannan.dev@gmail.com>
+Build-Depends: debhelper-compat (= 13), dh-python, python3-all, python3-setuptools, pybuild-plugin-pyproject
+Standards-Version: 4.6.2
+Homepage: https://github.com/gokulkannanganesamoorthy/vulnscan
+
+Package: vulnscan
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends},
+         python3-selenium,
+         python3-tqdm,
+         python3-reportlab,
+         python3-nmap,
+         python3-colorama,
+         python3-fuzzywuzzy,
+         python3-levenshtein,
+         python3-cryptography,
+         python3-dotenv,
+         python3-requests-toolbelt,
+         python3-beautifulsoup4,
+         python3-dnspython,
+         python3-html5lib,
+         python3-chardet,
+         python3-jinja2,
+         python3-uvloop,
+         python3-joblib
+Recommends: python3-tensorflow,
+            python3-keras,
+            python3-sklearn,
+            python3-numpy,
+            python3-pandas,
+            python3-boto3,
+            python3-google-cloud-storage,
+            python3-azure-storage-blob,
+            python3-kubernetes,
+            python3-matplotlib,
+            python3-seaborn,
+            python3-plotly
+Description: Powerful and lightweight Web Penetration Testing Toolkit
+ VulnScan is crafted to assist ethical hackers, security researchers,
+ and developers in identifying web application vulnerabilities quickly
+ and efficiently.
+ .
+ Features include:
+  - Port Scanning
+  - Domain Enumeration and Fingerprinting
+  - SQL Injection and XSS Testing
+  - CSRF and SSL/TLS Detection
+  - WAF Detection
+  - Wireless Controller and IoT API Scanning
+  - AI-Powered Vulnerability Detection

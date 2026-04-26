@@ -2,13 +2,13 @@
 
 **VulnScan** is a powerful and lightweight **Web Penetration Testing Toolkit** developed over 3 years of research, crafted to assist ethical hackers, security researchers, and developers in identifying web application vulnerabilities quickly and efficiently.
 
-> Built with passion. Backed by real-world interviews. Recognized by industry leaders.
+> ⚡ Built with passion. Backed by real-world interviews. Recognized by industry leaders.
 
 ---
 
 ## Features
 
-VulnScan currently includes **23 powerful modules**:
+VulnScan currently includes **25 powerful modules**:
 
 1. Change Target Domain
    - Function: `ensure_url_scheme`
@@ -86,7 +86,15 @@ VulnScan currently includes **23 powerful modules**:
     - Class: `SensitiveDataExposureTester`
     - Method: `check_sensitive_data`
 
-23. **Exit**
+23. **Wireless Controller Scan (WLC)**
+    - Class: `WirelessControllerScanner`
+    - Method: `run_tests`
+
+24. **WSN/IoT API Auditor (5G Core)**
+    - Class: `WSNApiAuditor`
+    - Method: `run_tests`
+
+25. **Exit**
 
 > Each module is plug-and-play and optimized for fast, accurate results.
 
